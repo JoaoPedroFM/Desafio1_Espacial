@@ -1,0 +1,113 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+################################################################################
+# Aula sobre a biblioteca spatstat e splancs:
+#################################################################################
+
+#Carregando o pacote
+library(spatstat)
+library(splancs)                                         
+
+
+# O spatstat e splancs são pacotes para trabalhar com dados espaciais ligados a 
+# processos pontuais.
+
+
+################################################################################
+# Visualização de processos pontuais:
+################################################################################
+
+# Para a biblioteca spatstat #
+
+# A biblioteca trabalha com objetos da classe "ppp". Se tivermos dados 
+# e quisermos utilizar esta função, temos que transformá-los em objeto "ppp".
+
+################################################################################
+# Explorando e modelando dados de processos pontuais:
+################################################################################
+
+#########################
+# Método dos quadrantes #
+#########################
+
+# Na biblioteca spatstat
+data(gordon) # Localização de pessoas sentadas na grama do Gordon Square em Londres, Inglaterra às
+             # 15h de uma tarde ensolarada
+plot(gordon)
+quadrantes1 <- quadratcount(gordon,nx=5,ny=4)    
+quadrantes1 
+
+
+plot(gordon,pch="+")
+plot(quadrantes1,add=TRUE, col="red", cex=1.5, lty=2)
+
+t_quadrantes <- quadrat.test(gordon,nx=5,ny=4)    
+t_quadrantes
+qchisq(0.95,19)
+
+
+
+quadrantes2 <- quadratcount(gordon,nx=5,ny=3) 
+
+plot(gordon,pch="+")
+plot(quadrantes2,add=TRUE, col="red", cex=1.5, lty=2)
+
+t_quadrantes <- quadrat.test(gordon,5,3) 
+t_quadrantes
+qchisq(0.95,14)
+
+# Índices
+media1 <- mean(quadrantes1)
+variancia1 <- sum((quadrantes1 - media1)^2/19)
+
+media2 <- mean(quadrantes2)
+variancia2 <- sum((quadrantes2 - media2)^2/14)
+
+# ICS:
+(variancia1/media1) - 1
+
+# ICS:
+(variancia2/media2) - 1               
+
+
+
+# Intensidade estimada lambda_i
+intensity(quadrantes1)
+par(mar=c(0,0,0,2))
+plot(intensity(quadrantes1, image=TRUE), main="", 
+     col=terrain.colors(256))
+
+
+
+#######################################
+# Estimador de intensidade via KERNEL #
+#######################################
+
+# Para o pacote spatstat
+
+data(gordon) 
+plot(gordon,pch="+")
+
+#Estimador de Kernel: Exemplo 1
+intensidade <- density.ppp(gordon,sigma=0.05)  #sigma é o raio e podemos colocar efeito borda (edge=TRUE)
+plot(intensidade)
+
+intensidade <- density.ppp(gordon,sigma=0.1)  
+plot(intensidade)
+
+intensidade <- density.ppp(gordon,sigma=0.5)  
+plot(intensidade)
+
+#Exemplo 2:
+intensidade2 <- density.ppp(gordon,sigma=0.05,edge=TRUE)  
+plot(intensidade2)
+
+intensidade2 <- density.ppp(gordon,sigma=0.1,edge=TRUE)  
+plot(intensidade2)
+
+

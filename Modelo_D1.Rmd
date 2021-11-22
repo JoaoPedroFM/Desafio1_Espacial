@@ -1,0 +1,81 @@
+---
+title: "Desafio I - Processos Pontuais"
+subtitle: "Estatística Espacial I"
+author: "Aluno: XXXXXXXX."
+date: "18/11/2021"
+output: 
+  rmdformats::readthedown:
+#   use_bookdown: true  
+    fig_caption: true
+  html_document: 
+    fig_height: 10
+    fig_width: 12.5
+editor_options: 
+  chunk_output_type: console
+css: custom.css
+---
+
+```{r echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE,
+                      echo = FALSE,
+                      include = FALSE)
+
+htmltools::img(src = knitr::image_uri("logoUffAzulTransparente.png"), 
+               alt = 'logo', 
+               style = 'position:absolute; top:10px; right:0; padding:5px;width: 150px; height: 80px')
+
+library(pacman)
+p_load(char = c("kableExtra", 
+                "foreign",
+                "tidyverse",
+                "readxl",
+                "lubridate",
+                "sf",
+                "tmap",
+                "ggplot2")) 
+
+#setwd("C:/Users/rafae/Dropbox/UFF/LES/ASSESSORIAS/2021/Mariana Seglia - Fiocruz/Atendimento LES - Mariana/Shape")
+```
+
+<div style="text-align: justify">
+
+# Objetivo
+
+XXXXXXXXX
+
+# Análise X {.tabset .tabset-fade .tabset-pills}
+
+
+
+```{r}
+
+
+```
+
+## Parte I 
+
+```{r include = TRUE}
+
+
+```
+
+
+
+## Parte II
+
+```{r include = TRUE}
+
+
+```
+
+
+
+
+# Análise Y {.tabset .tabset-fade .tabset-pills}
+
+```{r include = TRUE}
+
+```
+
+
