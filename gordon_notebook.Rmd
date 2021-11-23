@@ -50,32 +50,14 @@ t_quadrantes <- quadrat.test(gordon,nx=5,ny=4)
 t_quadrantes
 qchisq(0.95,19)
 
-
-
-quadrantes2 <- quadratcount(gordon,nx=5,ny=3) 
-
-plot(gordon,pch="+")
-plot(quadrantes2,add=TRUE, col="red", cex=1.5, lty=2)
-
-t_quadrantes <- quadrat.test(gordon,5,3) 
-t_quadrantes
-qchisq(0.95,14)
-
 # Índices
 media1 <- mean(quadrantes1)
 variancia1 <- sum((quadrantes1 - media1)^2/19)
 
-media2 <- mean(quadrantes2)
-variancia2 <- sum((quadrantes2 - media2)^2/14)
 
 # ICS:
 (variancia1/media1) - 1
-
-# ICS:
-(variancia2/media2) - 1               
-
-
-
+            
 # Intensidade estimada lambda_i
 intensity(quadrantes1)
 par(mar=c(0,0,0,2))
@@ -97,10 +79,10 @@ plot(gordon,pch="+")
 intensidade <- density.ppp(gordon,sigma=0.05)  #sigma é o raio e podemos colocar efeito borda (edge=TRUE)
 plot(intensidade)
 
-intensidade <- density.ppp(gordon,sigma=0.1)  
+intensidade <- density.ppp(gordon,sigma=0.5)  
 plot(intensidade)
 
-intensidade <- density.ppp(gordon,sigma=0.5)  
+intensidade <- density.ppp(gordon,sigma=2.5)  
 plot(intensidade)
 
 #Exemplo 2:
@@ -109,5 +91,164 @@ plot(intensidade2)
 
 intensidade2 <- density.ppp(gordon,sigma=0.1,edge=TRUE)  
 plot(intensidade2)
+
+
+
+
+############################
+#   Vizinho mais próximo   #
+############################
+
+# Para o pacote splancs                            
+
+dists <- nndistG(as.points(gordon))
+dists                                                     
+maximo <- max(dists$dists)
+minimo <- min(dists$dists)
+w <- seq(minimo,maximo,by=((maximo - minimo)/100))
+
+# Função G
+
+## o comando Ghat recebe 2 parâmetros, o primeiro o objeto pontos, 
+## o segundo um vetor com a lista de distâncias onde se estima a função G
+
+funcao_G <- Ghat(as.points(gordon),w)
+plot(w,funcao_G,type="l",xlab="distâncias", ylab="G estimada")
+
+# Função F
+dists2 <- nndistF(as.points(csr(centroids, length(gordon$x))), as.points(gordon))
+maximo <- max(dists2)
+minimo <- min(dists2)
+x <- seq(minimo,maximo,by=((maximo - minimo)/100))
+funcao_F <- Fhat(as.points(csr(centroids, length(gordon$x))), as.points(gordon),x)
+plot(x,funcao_F,type="l", xlab="distâncias", ylab="F estimada")
+
+
+#Função G x F
+plot(funcao_G, funcao_F, type="l", xlab="G estimada", ylab="F estimada")
+abline(0,1,lty=2,col=2)
+
+
+
+############################
+#      Função K            #
+############################
+
+# Para a biblioteca splancs:
+
+h <- seq(0,800,10)
+funcaoK<- khat(as.points(gordon), centroids, h)
+funcaoL<- sqrt(funcaoK/pi) - h
+
+m <- 99
+funcaoK.i<-matrix(NA,length(h),m)
+funcaoL.i<-matrix(NA,length(h),m)
+for (i in 1:m) {
+  y<-as.points(csr(centroids, length(gordon$x)))
+  funcaoK.i[,i]<- khat(y, centroids, h)
+  funcaoL.i[,i]<- sqrt(funcaoK.i[,i]/pi) - h
+}
+env.sup<-0
+for (i in 1:length(h)) {
+  env.sup[i]<-max(funcaoL.i[i,])
+}
+env.inf<-0
+for (i in 1:length(h)) {
+  env.inf[i]<-min(funcaoL.i[i,])
+}
+
+par(mar=c(4.5,4.5,0.5,0.5))
+plot(h,funcaoL, type="l", xlab="Distâncias", lwd=2, ylab=expression(hat(L)(h)),ylim=c(-30,60))
+lines(h,rep(0,length(h)),lty=2,col=2,lwd=2)
+lines(h,env.sup,lty=3,col=4,lwd=2)
+lines(h,env.inf,lty=3,col=4,lwd=2)
+
+
+
+
+
+library(splancs)
+grd <- GridTopology(c(min(gordon[["x"]]), min(gordon[["y"]])), c(max(gordon[["x"]]), max(gordon[["y"]])), c(99,99))
+polys <- as.SpatialPolygons.GridTopology(grd)
+centroids <- coordinates(polys)
+
+library(dplyr)
+centroids = as.data.frame(centroids) |> 
+  rename(x= V1, y= V2)
+
+centroids = as.matrix(centroids)
+
+
+
+
+
+
+############################
+#   Vizinho mais próximo   #
+############################
+
+# Para o pacote splancs                            
+
+dists <- nndistG(as.points(gordon))
+dists                                                     
+maximo <- max(dists$dists)
+minimo <- min(dists$dists)
+w <- seq(minimo,maximo,by=((maximo - minimo)/100))
+
+# Função G
+
+## o comando Ghat recebe 2 parâmetros, o primeiro o objeto pontos, 
+## o segundo um vetor com a lista de distâncias onde se estima a função G
+
+funcao_G <- Ghat(as.points(gordon),w)
+plot(w,funcao_G,type="l",xlab="distâncias", ylab="G estimada")
+
+# Função F
+dists2 <- nndistF(as.points(csr(centroids, 19602)), as.points(gordon))
+maximo <- max(dists2)
+minimo <- min(dists2)
+x <- seq(minimo,maximo,by=((maximo - minimo)/100))
+funcao_F <- Fhat(as.points(csr(centroids, length(gordon$x))), as.points(gordon),x)
+plot(x,funcao_F,type="l", xlab="distâncias", ylab="F estimada")
+
+
+#Função G x F
+plot(funcao_G, funcao_F, type="l", xlab="G estimada", ylab="F estimada")
+abline(0,1,lty=2,col=2)
+
+
+
+############################
+#      Função K            #
+############################
+
+# Para a biblioteca splancs:
+
+h <- seq(0,800,10)
+funcaoK<- khat(as.points(gordon), centroids, h)
+funcaoL<- sqrt(funcaoK/pi) - h
+
+m <- 99
+funcaoK.i<-matrix(NA,length(h),m)
+funcaoL.i<-matrix(NA,length(h),m)
+for (i in 1:m) {
+  y<-as.points(csr(centroids, length(gordon$x)))
+  funcaoK.i[,i]<- khat(y, centroids, h)
+  funcaoL.i[,i]<- sqrt(funcaoK.i[,i]/pi) - h
+}
+env.sup<-0
+for (i in 1:length(h)) {
+  env.sup[i]<-max(funcaoL.i[i,])
+}
+env.inf<-0
+for (i in 1:length(h)) {
+  env.inf[i]<-min(funcaoL.i[i,])
+}
+
+par(mar=c(4.5,4.5,0.5,0.5))
+plot(h,funcaoL, type="l", xlab="Distâncias", lwd=2, ylab=expression(hat(L)(h)),ylim=c(-30,60))
+lines(h,rep(0,length(h)),lty=2,col=2,lwd=2)
+lines(h,env.sup,lty=3,col=4,lwd=2)
+lines(h,env.inf,lty=3,col=4,lwd=2)
 
 

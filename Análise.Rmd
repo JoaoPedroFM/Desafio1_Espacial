@@ -1,0 +1,136 @@
+---
+title: "Desafio I - Processos Pontuais"
+subtitle: "Estatística Espacial I"
+author: "Alunos: Igor Freitas e João Pedro Fernandes"
+date: "02/12/2021"
+output: 
+  rmdformats::readthedown:
+    use_bookdown: true  
+    fig_caption: true
+  html_document: 
+    fig_height: 10
+    fig_width: 12.5
+editor_options: 
+  chunk_output_type: console
+css: custom.css
+---
+
+```{r echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE,
+                      echo = FALSE,
+                      include = FALSE)
+
+htmltools::img(src = knitr::image_uri("logoUffAzulTransparente.png"), 
+               alt = 'logo', 
+               style = 'position:absolute; top:10px; right:0; padding:5px;width: 150px; height: 80px')
+
+library(pacman)
+p_load(char = c("kableExtra", 
+                "foreign",
+                "tidyverse",
+                "readxl",
+                "lubridate",
+                "sf",
+                "tmap",
+                "ggplot2")) 
+
+#setwd("C:/Users/rafae/Dropbox/UFF/LES/ASSESSORIAS/2021/Mariana Seglia - Fiocruz/Atendimento LES - Mariana/Shape")
+```
+
+<div style="text-align: justify">
+
+# Objetivo
+
+O estudo se baseia no conjunto de dados recolhidos por Andrew Bevan da University College London.
+
+As informações contêm a localização de pessoas sentadas na grama do Gordon Square.
+
+Os pesquisadores Igor Freitas e João Pedro Fernandes, pensando em realizar uma viagem a Londres em busca de aprimorar a língua inglesa, decidiram estudar locais com possíveis aglomerações a fim de achar um local adequado para encontrar um maior número de falantes nativos e assim, ter maior contato com o idioma inglês.
+
+Além disso, um bom lugar para realizar piqueniques, sendo esses locais com conglomerados de pessoas.
+
+
+# Análises exploratórias {.tabset .tabset-fade .tabset-pills}
+
+Os dados referentes à localização de pessoas sentadas na grama do Gordon Square em Londres, Inglaterra às 15h de uma tarde ensolarada.
+
+Cada coordenada corresponde a uma única pessoa sendo que esta coordenada é dada em metros.
+
+Como é possível observar na figura abaixo, há dois buracos no espaço observado, que apresenta a forma de um polígono irregular.
+
+Aparentemente, próximo ao menor buraco, há uma certa aglomeração de pessoas, podendo indicar que é uma região propícia a confraternizações. 
+
+
+```{r include = TRUE}
+library(spatstat)
+data(gordon)
+plot(gordon,pch="+",main="Pessoas sentadas na grama do Gordon Square")
+```
+<center><font size="2">
+**Figura 1 - Localização de pessoas sentadas na grama do Gordon Square, Londres às 15h de um dia ensolarado**
+</center></font>
+
+# Análises do padrão de pontos {.tabset .tabset-fade .tabset-pills}
+
+## Parte I 
+
+```{r include = TRUE}
+quadrantes1 <- quadratcount(gordon,nx=5,ny=4)    
+quadrantes1 
+
+plot(gordon,pch="+")
+plot(quadrantes1,add=TRUE, col="red", cex=1.5, lty=2)
+
+```
+
+
+
+## Parte II
+
+A média encontrada foi `r mean(quadrantes1)` e a variância `r sum((quadrantes1 - mean(quadrantes1))^2/19)`
+
+́Indice de Tamanho de Cluster (ICS):
+`r (sum((quadrantes1 - mean(quadrantes1))^2/19)/mean(quadrantes1)) - 1`
+
+
+```{r include = TRUE}
+t_quadrantes <- quadrat.test(gordon,nx=5,ny=4)    
+t_quadrantes
+qchisq(0.95,19)
+
+```
+
+## Parte III
+
+```{r include = TRUE}
+# Intensidade estimada lambda_i
+intensity(quadrantes1)
+par(mar=c(0,0,0,2))
+plot(intensity(quadrantes1, image=TRUE), main="", 
+     col=terrain.colors(256))
+```
+
+## Parte IV
+
+```{r include = TRUE}
+#######################################
+# Estimador de intensidade via KERNEL #
+#######################################
+
+intensidade <- density.ppp(gordon,sigma=2.5)  
+plot(intensidade)
+
+```
+
+# Conclusões {.tabset .tabset-fade .tabset-pills}
+
+$\bar{x}$ = média
+$s^2$ = variância
+
+```{r include = TRUE}
+
+
+
+```
+
