@@ -1,7 +1,7 @@
 ---
 title: "Desafio I - Processos Pontuais"
 subtitle: "Estatística Espacial I"
-author: "Alunos: Igor Freitas e João Pedro Fernandes"
+author: "Igor Freitas e João Pedro Fernandes"
 date: "02/12/2021"
 output: 
   rmdformats::readthedown:
@@ -62,7 +62,7 @@ Como é possível observar na figura abaixo, há dois buracos no espaço observa
 Aparentemente, próximo ao menor buraco, há uma certa aglomeração de pessoas, podendo indicar que é uma região propícia a confraternizações. 
 
 
-```{r include = TRUE}
+```{r fig.height = 5, include = TRUE}
 library(spatstat)
 data(gordon)
 plot(gordon,pch="+",main="Pessoas sentadas na grama do Gordon Square")
@@ -75,62 +75,91 @@ plot(gordon,pch="+",main="Pessoas sentadas na grama do Gordon Square")
 
 ## Parte I 
 
-```{r include = TRUE}
+Através do Método dos Quadrantes, foi viável contabilizar o número de pessoas sentadas em cada quadrante em que a área do Gordon Square foi dividida. 
+
+Pela escolha feita do número de quadrantes, observa-se que acima e ao lado esquerdo do menor buraco parece haver uma maior concentração, o que corrobora com a análise inicial.
+
+```{r results='hide'}
 quadrantes1 <- quadratcount(gordon,nx=5,ny=4)    
 quadrantes1 
+```
 
-plot(gordon,pch="+")
+```{r fig.height = 5, include = TRUE}
+
+plot(gordon,pch="+", main="Quadrantes do Gordon Square")
 plot(quadrantes1,add=TRUE, col="red", cex=1.5, lty=2)
 
 ```
-
+<center><font size="2">
+**Figura 2 - Dispersão de pessoas em cada quadrante**
+</center></font>
 
 
 ## Parte II
 
-A média encontrada foi `r mean(quadrantes1)` e a variância `r sum((quadrantes1 - mean(quadrantes1))^2/19)`
+Calculou-se o Índice de Tamanho de Cluster (ICS), que se utiliza da média e da variância das contagens em cada quadrante, cujo valor nos dará um indicativo sobre o tipo de padrão de pontos.
 
-́Indice de Tamanho de Cluster (ICS):
-`r (sum((quadrantes1 - mean(quadrantes1))^2/19)/mean(quadrantes1)) - 1`
+A média encontrada foi $\bar{x}$ = `r mean(quadrantes1)` e a variância  $s^2$ = `r sum((quadrantes1 - mean(quadrantes1))^2/19)`. 
 
+Assim, ICS=`r (sum((quadrantes1 - mean(quadrantes1))^2/19)/mean(quadrantes1)) - 1`. Como o ICS é maior que 0, é indicada a aglomeração de pessoas.
 
-```{r include = TRUE}
+Realizando o Teste de Quadrantes para Aleatoriedade Espacial Completa (CSR), foi confrontada a hipótese de que o processo pontual segue o modelo CSR versus a hipótese de que não segue.
+
+Para a avaliação do teste, foi obtido o valor da estatística de teste $X^2$ e este valor foi comparado ao valor do quantil da distribuição Qui-Quadrado com 95% de confiança e 18 graus de liberdade.
+
+Como $X^2$= 53.836 > $\chi_{0.95,18}$= 28.8693, rejeita-se a hipótese nula, ou seja, as evidências são de que não há aleatoriedade.
+
+```{r results='hide'}
 t_quadrantes <- quadrat.test(gordon,nx=5,ny=4)    
 t_quadrantes
-qchisq(0.95,19)
+qchisq(0.95,18)
 
 ```
 
 ## Parte III
 
-```{r include = TRUE}
+Já que não existem evidências de aleatoriedade, podemos estimar as intensidades do número de eventos por área.
+
+Primeiramente, foram estimadas as intensidades via Método dos Quadrantes, de forma que os resultados são possíveis de se verificar na Figura 3 abaixo.
+
+Com a determinada quantidade de quadrantes escolhida, é perceptível que as faixas com maiores aglomerações de pessoas são aquelas à esquerda e logo acima do menor buraco.
+
+```{r results='hide'}
 # Intensidade estimada lambda_i
 intensity(quadrantes1)
-par(mar=c(0,0,0,2))
-plot(intensity(quadrantes1, image=TRUE), main="", 
+```
+
+```{r fig.height = 5, include = TRUE}
+#par(mar=c(0,0,0,2))
+plot(intensity(quadrantes1, image=TRUE), main="Intensidade via Quadrantes",
      col=terrain.colors(256))
 ```
+<center><font size="2">
+**Figura 3- Intensidade estimada via Quadrantes**
+</center></font>
 
 ## Parte IV
 
-```{r include = TRUE}
+Analisando as intensidades estimadas via Kernel, pode-se chegar às mesmas conclusões das que foram observadas para o Método dos Quadrantes.
+
+```{r fig.height = 5, include = TRUE}
 #######################################
 # Estimador de intensidade via KERNEL #
 #######################################
 
 intensidade <- density.ppp(gordon,sigma=2.5)  
-plot(intensidade)
+plot(intensidade, main="Intensidade via Kernel")
 
 ```
+<center><font size="2">
+**Figura 4- Intensidade estimada via Kernel**
+</center></font>
 
 # Conclusões {.tabset .tabset-fade .tabset-pills}
 
-$\bar{x}$ = média
-$s^2$ = variância
+Neste trabalho, após traçar um objetivo inicial, foram feitas análises exploratórias e de padrões pontuais por meio de gráficos de dispersão e testes de quadrantes de CSR, respectivamente.
 
-```{r include = TRUE}
+Com isso, foi possibilitado estimar intensidades via métodos de Quadrantes e de Kernel, a fim de auxiliar na tomada de decisões.
 
-
-
-```
+Por fim, é possível concluir que, pelo interesse dos pesquisadores, o melhor local para frequentarem seria aquele nas proximidades do menor buraco, destacando os lados norte e oeste, já que, pelas análises, esses são os que apresentam maior número de pessoas aglomeradas.
 
