@@ -64,6 +64,8 @@ Aparentemente, próximo ao menor buraco, há uma certa aglomeração de pessoas,
 
 ```{r fig.height = 5, include = TRUE}
 library(spatstat)
+library(splancs)
+
 data(gordon)
 plot(gordon,pch="+",main="Pessoas sentadas na grama do Gordon Square")
 ```
@@ -155,11 +157,120 @@ plot(intensidade, main="Intensidade via Kernel")
 **Figura 4- Intensidade estimada via Kernel**
 </center></font>
 
+## Parte V
+
+Através do Método do Vizinho mais Próximo, foram estimadas as funções G(w) e F(x) para avaliar se havia dependência espacial. 
+
+As funções $\hat{G}$(w) e $\hat{F}$(x) apresentam crescimento rápido para pequenos valores, o que indica padrão de agregação espacial.
+
+```{r fig.height = 5, include = TRUE}
+w <- owin(c(-26.40848,26.40848),c(-36.32095,36.32095), poly=list(x=c(1,2,3,2,1), y=c(2,3,4,6,7)))
+r <- as.rectangle(w)
+r = as.data.frame(r)
+x = r$x
+y = r$y
+r = cbind(x,y)
+
+gordon$poly = r
+
+############################
+#   Vizinho mais próximo   #
+############################
+
+# Para o pacote splancs                            
+
+dists <- nndistG(as.points(gordon))
+maximo <- max(dists$dists)
+minimo <- min(dists$dists)
+w <- seq(minimo,maximo,by=((maximo - minimo)/100))
+
+# Função G
+
+## o comando Ghat recebe 2 parâmetros, o primeiro o objeto pontos, 
+## o segundo um vetor com a lista de distâncias onde se estima a função G
+
+par(mfrow=c(1,2))
+funcao_G <- Ghat(as.points(gordon),w)
+g= plot(w,funcao_G,type="l",xlab="distâncias", ylab="G estimada")
+
+# Função F
+dists2 <- nndistF(as.points(csr(gordon$poly, length(gordon$x))), as.points(gordon))
+maximo <- max(dists2)
+minimo <- min(dists2)
+x <- seq(minimo,maximo,by=((maximo - minimo)/100))
+funcao_F <- Fhat(as.points(csr(gordon$poly, length(gordon$x))), as.points(gordon),x)
+f= plot(x,funcao_F,type="l", xlab="distâncias", ylab="F estimada")
+
+```
+<center><font size="2">
+**Figura 5- Funções de distribuição do vizinho mais próximo, $\hat{G}$(w) e $\hat{F}$(x), para a localização das pessoas sentadas na grama do Gordon Square**
+</center></font>
+
+Plotando a função $\hat{G}$(w) versus a função $\hat{F}$(x), verificou-se que $\hat{G}$(w) é maior do que $\hat{F}$(x), logo, indicando a existência de clusters espaciais.
+
+```{r fig.height = 5, include = TRUE}
+#Função G x F
+par(mfrow=c(1,1))
+plot(funcao_G, funcao_F, type="l", xlab="G estimada", ylab="F estimada")
+abline(0,1,lty=2,col=2)
+```
+<center><font size="2">
+**Figura 6- $\hat{G}$(w) versus $\hat{F}$(x) para a localização das pessoas sentadas na grama do Gordon Square**
+</center></font>
+
+## Parte VI
+
+Realizando o teste da função K de Ripley, percebe-se que os valores da função $\hat{L}$(h) do processo pontual observado estão acima do limite superior para pequenos valores de h (distâncias), indicando padrão de agregação espacial.
+
+```{r fig.height = 5, include = TRUE}
+############################
+#      Função K            #
+############################
+
+# Para a biblioteca splancs:
+
+h <- seq(0,800,10)
+funcaoK<- khat(as.points(gordon), gordon$poly, h)
+funcaoL<- sqrt(funcaoK/pi) - h
+
+m <- 99
+funcaoK.i<-matrix(NA,length(h),m)
+funcaoL.i<-matrix(NA,length(h),m)
+for (i in 1:m) {
+  y<-as.points(csr(gordon$poly, length(gordon$x)))
+  funcaoK.i[,i]<- khat(y, gordon$poly, h)
+  funcaoL.i[,i]<- sqrt(funcaoK.i[,i]/pi) - h
+}
+env.sup<-0
+for (i in 1:length(h)) {
+  env.sup[i]<-max(funcaoL.i[i,])
+}
+env.inf<-0
+for (i in 1:length(h)) {
+  env.inf[i]<-min(funcaoL.i[i,])
+}
+
+par(mar=c(4.5,4.5,0.5,0.5))
+plot(h,funcaoL, type="l", xlab="Distâncias", lwd=2, ylab=expression(hat(L)(h)), ylim= c(-10, 10),
+     xlim = c(0, 30))
+lines(h,rep(0,length(h)),lty=2,col=2,lwd=2)
+lines(h,env.sup,lty=3,col=4,lwd=2)
+lines(h,env.inf,lty=3,col=4,lwd=2)
+
+###################################################################################################
+
+```
+<center><font size="2">
+**Figura 7- Gráfico da função $\hat{L}$(h) versus as distâncias e os envelopes, para a localização das pessoas sentadas na grama do Gordon Square.**
+</center></font>
+
 # Conclusões {.tabset .tabset-fade .tabset-pills}
 
 Neste trabalho, após traçar um objetivo inicial, foram feitas análises exploratórias e de padrões pontuais por meio de gráficos de dispersão e testes de quadrantes de CSR, respectivamente.
 
 Com isso, foi possibilitado estimar intensidades via métodos de Quadrantes e de Kernel, a fim de auxiliar na tomada de decisões.
+
+Também para contribuir com os resultados, foram realizadas análises a respeito do método do vizinho mais próximo e do teste da função K de Ripley. 
 
 Por fim, é possível concluir que, pelo interesse dos pesquisadores, o melhor local para frequentarem seria aquele nas proximidades do menor buraco, destacando os lados norte e oeste, já que, pelas análises, esses são os que apresentam maior número de pessoas aglomeradas.
 
