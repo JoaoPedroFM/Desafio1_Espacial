@@ -2,7 +2,7 @@
 title: "Desafio I - Processos Pontuais"
 subtitle: "Estatística Espacial I"
 author: "Igor Freitas e João Pedro Fernandes"
-date: "02/12/2021"
+date: "Dezembro/2021"
 output: 
   rmdformats::readthedown:
     use_bookdown: true  
@@ -53,7 +53,7 @@ Além disso, um bom lugar para realizar piqueniques, sendo esses locais com cong
 
 # Análises exploratórias {.tabset .tabset-fade .tabset-pills}
 
-Os dados referentes à localização de pessoas sentadas na grama do Gordon Square em Londres, Inglaterra às 15h de uma tarde ensolarada.
+Os dados são referentes à localização de pessoas sentadas na grama do Gordon Square em Londres, Inglaterra às 15h de uma tarde ensolarada.
 
 Cada coordenada corresponde a uma única pessoa sendo que esta coordenada é dada em metros.
 
